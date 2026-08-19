@@ -90,10 +90,10 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full mt-4 bg-indigo-950 hover:bg-indigo-900 text-white text-sm font-semibold py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+          className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 px-4 rounded-md transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
         >
           {isSubmitting ? 'Memproses...' : 'Daftar Sekarang'}
-          <ArrowRight className='h-4 w-4' />
+          <ArrowRight size={16} />
         </button>
       </form>
     </AuthLayout>

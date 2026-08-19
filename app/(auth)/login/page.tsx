@@ -73,10 +73,10 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-indigo-950 hover:bg-indigo-900 text-white text-sm font-semibold py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 px-4 rounded-md transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
         >
           {isSubmitting ? 'Memproses...' : 'Masuk Sekarang'}
-          <LogIn className='h-4 w-4' />
+          <LogIn size={16} />
         </button>
       </form>
     </AuthLayout>

@@ -21,11 +21,11 @@ export const AuthLayout = ({
 }: AuthLayoutProps) => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-7">
+      <div className="w-full max-w-sm bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-7">
 
         <div className="flex flex-col items-center mb-6 text-center">
           {headerIcon && (
-            <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 mb-3">
+            <div className="w-10 h-10 bg-blue-100 rounded-md flex items-center justify-center text-blue-700 mb-3">
               {headerIcon}
             </div>
           )}
@@ -38,7 +38,7 @@ export const AuthLayout = ({
         <div className="mt-6 text-center">
           <p className="text-xs text-gray-500">
             {footerText}{' '}
-            <a href={footerHref} className="font-semibold text-indigo-600 hover:text-indigo-700">
+            <a href={footerHref} className="font-semibold text-blue-600 hover:text-blue-700">
               {footerLinkText}
             </a>
           </p>
