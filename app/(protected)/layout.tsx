@@ -54,7 +54,7 @@ export default async function ProtectedLayout({
     <div className="flex h-screen bg-white">
       <Sidebar user={currentUser} organizationName={activeOrg?.orgName || "Management App"} />
       
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto text-black">
         {children}
       </main>
     </div>
