@@ -69,7 +69,7 @@ export async function loginUser(formData: LoginFormData) {
   return { success: true };
 }
 
-export async function logout() {
+export async function logoutUser(): Promise<{ success: boolean }>{
   (await cookies()).delete('auth_token');
   return { success : true };
 }
