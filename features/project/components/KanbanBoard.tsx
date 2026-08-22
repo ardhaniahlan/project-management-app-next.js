@@ -11,21 +11,15 @@ import { moveTask } from "@/features/task/actions/taskActions";
 import { toast } from "sonner";
 import { TaskModal } from "@/features/task/components/TaskModal";
 import { Plus, MoreHorizontal } from "lucide-react";
+import { Task } from "@/features/task/types/task.types";
 
 type Board = { id: number; name: string; position: number };
-type Task = {
-  id: number;
-  title: string;
-  description: string | null;
-  priority: string;
-  boardId: number;
-  position: number;
-};
 
 interface KanbanBoardProps {
   projectId: number;
   boards: Board[];
   initialTasks: Task[];
+  userRole: string;
 }
 
 const statusDotColor = (boardName: string) => {
@@ -50,6 +44,7 @@ export function KanbanBoard({
   projectId,
   boards,
   initialTasks,
+  userRole,
 }: KanbanBoardProps) {
   const [tasks, setTasks] = useState(initialTasks);
   const [isMounted, setIsMounted] = useState(false);
@@ -187,6 +182,23 @@ export function KanbanBoard({
                                   {task.description}
                                 </p>
                               )}
+
+                              {task.assignees && task.assignees.length > 0 && (
+                                <div className="mt-3 flex justify-end">
+                                  {/* -space-x-2 akan membuat avatar saling bertumpuk (overlap) */}
+                                  <div className="flex -space-x-2 overflow-hidden">
+                                    {task.assignees.map((assignee, i) => (
+                                      <div
+                                        key={assignee.userId}
+                                        className={` w-6 h-6 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center text-[10px] font-bold text-indigo-700 shadow-sm transition-all z-[${10 - i}] ${isDone ? "grayscale opacity-60" : ""}`}
+                                        title={`Ditugaskan ke ${assignee.name}`}
+                                      >
+                                        {assignee.name.charAt(0).toUpperCase()}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           );
                         }}
@@ -197,20 +209,23 @@ export function KanbanBoard({
                 )}
               </Droppable>
 
-              <button
-                onClick={() =>
-                  setModalState({
-                    isOpen: true,
-                    mode: "create",
-                    boardId: board.id,
-                    task: null,
-                  })
-                }
-                className="mt-3 w-full py-2.5 bg-transparent hover:bg-indigo-50/50 text-gray-400 hover:text-indigo-600 text-xs font-semibold rounded-xl border border-dashed border-gray-300 hover:border-indigo-300 transition-colors flex items-center justify-center gap-1.5"
-              >
-                <Plus size={14} />
-                Tambah Tugas
-              </button>
+              {(userRole === "owner" || userRole === "project_manager") &&
+                board.name.toLowerCase() !== "done" && (
+                  <button
+                    onClick={() =>
+                      setModalState({
+                        isOpen: true,
+                        mode: "create",
+                        boardId: board.id,
+                        task: null,
+                      })
+                    }
+                    className="mt-3 w-full py-2.5 bg-transparent hover:bg-indigo-50/50 text-gray-400 hover:text-indigo-600 text-xs font-semibold rounded-xl border border-dashed border-gray-300 hover:border-indigo-300 transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    <Plus size={14} />
+                    Tambah Tugas
+                  </button>
+                )}
             </div>
           );
         })}
@@ -218,13 +233,12 @@ export function KanbanBoard({
 
       <TaskModal
         isOpen={modalState.isOpen}
-        onClose={() =>
-          setModalState((prev) => ({ ...prev, isOpen: false }))
-        }
+        onClose={() => setModalState((prev) => ({ ...prev, isOpen: false }))}
         mode={modalState.mode}
         projectId={projectId}
         boardId={modalState.boardId}
         task={modalState.task}
+        userRole={userRole}
       />
     </DragDropContext>
   );

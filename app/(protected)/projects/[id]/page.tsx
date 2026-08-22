@@ -1,8 +1,8 @@
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import { db } from '@/db';
-import { projects, boards, tasks, organizationMembers } from '@/db/schema';
-import { eq, asc } from 'drizzle-orm';
+import { projects, boards, tasks, organizationMembers, taskAssignees, users } from '@/db/schema';
+import { eq, asc, inArray } from 'drizzle-orm';
 import { notFound } from 'next/navigation';
 import { Kanban, Plus, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -44,15 +44,36 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
   const project = currentProject[0];
 
+  const rawTasks = await db.select()
+    .from(tasks)
+    .where(eq(tasks.projectId, projectId))
+    .orderBy(asc(tasks.position));
+
+  const taskIds = rawTasks.map((t) => t.id);
+
+  let assigneesData: any[] = [];
+  if (taskIds.length > 0) {
+    assigneesData = await db.select({
+      taskId: taskAssignees.taskId,
+      userId: taskAssignees.userId,
+      name: users.name,
+    })
+    .from(taskAssignees)
+    .innerJoin(users, eq(taskAssignees.userId, users.id))
+    .where(inArray(taskAssignees.taskId, taskIds));
+  }
+
   const projectBoards = await db.select()
     .from(boards)
     .where(eq(boards.projectId, projectId))
     .orderBy(asc(boards.position));
 
-  const projectTasks = await db.select()
-    .from(tasks)
-    .where(eq(tasks.projectId, projectId))
-    .orderBy(asc(tasks.position));
+  const projectTasks = rawTasks.map((task) => ({
+    ...task,
+    assignees: assigneesData
+      .filter((a) => a.taskId === task.id)
+      .map((a) => ({ userId: a.userId, name: a.name })),
+  }));
 
   return (
     <div className="p-8 h-screen flex flex-col bg-gray-50/50">
@@ -73,7 +94,12 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
         </div>
       </div>
 
-      <KanbanBoard projectId={projectId} boards={projectBoards} initialTasks={projectTasks} />
+      <KanbanBoard 
+        projectId={projectId} 
+        boards={projectBoards} 
+        initialTasks={projectTasks}
+        userRole={userOrg[0].role} 
+      />
 
     </div>
   );
