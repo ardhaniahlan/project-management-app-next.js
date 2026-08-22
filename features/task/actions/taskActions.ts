@@ -69,3 +69,21 @@ export async function createTask(data: TaskInput) {
     return { error: 'Terjadi kesalahan sistem saat membuat tugas.' };
   }
 }
+
+export async function moveTask(taskId: number, newBoardId: number, projectId: number) {
+  const token = (await cookies()).get('auth_token')?.value;
+  if (!token) return { error: 'Sesi tidak valid.' };
+
+  try {
+    await db.update(tasks)
+      .set({ boardId: newBoardId })
+      .where(eq(tasks.id, taskId));
+
+    revalidatePath(`/projects/${projectId}`);
+    return { success: true };
+
+  } catch (err) {
+    console.error("Gagal memindah tugas:", err);
+    return { error: 'Terjadi kesalahan saat menyimpan posisi tugas.' };
+  }
+}
