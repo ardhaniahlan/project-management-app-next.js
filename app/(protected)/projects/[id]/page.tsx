@@ -6,6 +6,7 @@ import { eq, asc } from 'drizzle-orm';
 import { notFound } from 'next/navigation';
 import { Kanban, Plus, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { CreateTaskModal } from '@/features/task/components/CreateTaskModal';
 
 const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET);
 
@@ -124,10 +125,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                 )}
               </div>
 
-              <button className="mt-3 w-full py-2 bg-white hover:bg-blue-50 hover:text-blue-700 text-gray-600 text-xs font-semibold rounded-md border border-gray-200 transition-colors flex items-center justify-center gap-1.5">
-                <Plus size={14} />
-                Tambah Tugas
-              </button>
+              <CreateTaskModal projectId={projectId} boardId={board.id} />
             </div>
           );
         })}
