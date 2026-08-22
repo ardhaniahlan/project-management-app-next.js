@@ -87,3 +87,52 @@ export async function moveTask(taskId: number, newBoardId: number, projectId: nu
     return { error: 'Terjadi kesalahan saat menyimpan posisi tugas.' };
   }
 }
+
+export async function updateTask(
+  taskId: number, 
+  projectId: number, 
+  data: { title?: string; description?: string; priority?: 'low' | 'medium' | 'high'; dueDate?: string | null }
+) {
+  const token = (await cookies()).get('auth_token')?.value;
+  if (!token) return { error: 'Sesi tidak valid.' };
+
+  try {
+    await jwtVerify(token, SECRET_KEY);
+
+    const parsedDueDate = data.dueDate ? new Date(data.dueDate) : null;
+
+    await db.update(tasks)
+      .set({
+        ...(data.title && { title: data.title }),
+        ...(data.description !== undefined && { description: data.description }),
+        ...(data.priority && { priority: data.priority }),
+        ...(data.dueDate !== undefined && { dueDate: parsedDueDate }),
+      })
+      .where(eq(tasks.id, taskId));
+
+    revalidatePath(`/projects/${projectId}`);
+    return { success: true };
+
+  } catch (err) {
+    console.error("Gagal memperbarui tugas:", err);
+    return { error: 'Terjadi kesalahan saat memperbarui tugas.' };
+  }
+}
+
+export async function deleteTask(taskId: number, projectId: number) {
+  const token = (await cookies()).get('auth_token')?.value;
+  if (!token) return { error: 'Sesi tidak valid.' };
+
+  try {
+    await jwtVerify(token, SECRET_KEY);
+
+    await db.delete(tasks).where(eq(tasks.id, taskId));
+
+    revalidatePath(`/projects/${projectId}`);
+    return { success: true };
+
+  } catch (err) {
+    console.error("Gagal menghapus tugas:", err);
+    return { error: 'Terjadi kesalahan saat menghapus tugas.' };
+  }
+}

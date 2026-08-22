@@ -57,7 +57,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   return (
     <div className="p-8 h-screen flex flex-col bg-gray-50/50">
       
-      <div className="flex flex-col gap-2 mb-6">
+      <div className="flex flex-col gap-4 mb-6">
         <Link href="/projects" className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors w-fit">
           <ArrowLeft size={16} />
           Kembali ke Daftar Proyek
