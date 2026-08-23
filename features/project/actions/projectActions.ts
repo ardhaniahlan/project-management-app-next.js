@@ -54,3 +54,37 @@ export async function createProject(data: ProjectInput) {
     return { error: 'Terjadi kesalahan sistem saat membuat proyek.' };
   }
 }
+
+export async function updateProjectStatus(projectId: number, newStatus: 'active' | 'completed', organizationId: number) {
+  try {
+    const token = (await cookies()).get('auth_token')?.value;
+    if (!token) return { error: 'Sesi tidak valid.' };
+
+    const { payload } = await jwtVerify(token, SECRET_KEY);
+    const currentUserId = payload.userId as number;
+    if (!currentUserId) return { error: 'Gagal memverifikasi identitas.' };
+
+    const [userOrg] = await db.select({ role: organizationMembers.role })
+      .from(organizationMembers)
+      .where(
+        and(
+          eq(organizationMembers.userId, Number(currentUserId)),
+          eq(organizationMembers.organizationId, organizationId)
+        )
+      );
+
+    if (!userOrg || (userOrg.role !== 'owner' && userOrg.role !== 'project_manager')) {
+      return { error: 'Akses ditolak. Hanya Owner dan PM yang dapat menyelesaikan proyek.' };
+    }
+
+    await db.update(projects)
+      .set({ status: newStatus })
+      .where(eq(projects.id, projectId));
+
+    revalidatePath(`/projects/${projectId}`);
+    revalidatePath(`/dashboard`); 
+    return { success: true };
+  } catch (error) {
+    return { error: 'Terjadi kesalahan sistem.' };
+  }
+}
