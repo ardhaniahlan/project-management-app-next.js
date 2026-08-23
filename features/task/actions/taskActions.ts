@@ -7,6 +7,7 @@ import {
   projects,
   taskAssignees,
   users,
+  taskChecklists,
 } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { cookies } from "next/headers";
@@ -81,6 +82,14 @@ export async function createTask(data: TaskInput) {
       if (assigneesToInsert.length > 0) {
         await db.insert(taskAssignees).values(assigneesToInsert);
       }
+    }
+
+    if (data.checklists && data.checklists.length > 0) {
+      const checklistToInsert = data.checklists.map(title => ({
+        taskId: newTask.id,
+        title: title
+      }));
+      await db.insert(taskChecklists).values(checklistToInsert);
     }
 
     revalidatePath(`/projects/${data.projectId}`);

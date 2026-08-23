@@ -13,7 +13,8 @@ export const taskSchema = z.object({
   projectId: z.number(),
   boardId: z.number(),
 
-  assigneeIds: z.array(z.string()).optional()
+  assigneeIds: z.array(z.string()).optional(),
+  checklists: z.array(z.string()).optional(),
 });
 
 export type TaskInput = z.infer<typeof taskSchema>;

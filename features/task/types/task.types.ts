@@ -1,15 +1,23 @@
-export type Task = {
+export interface TaskAssignee {
+  userId: number;
+  name: string;
+}
+
+// Tambahkan tipe untuk Checklist
+export interface TaskChecklist {
+  id: number;
+  title: string;
+  isCompleted: boolean;
+}
+
+export interface Task {
   id: number;
   title: string;
   description: string | null;
   priority: string;
   boardId: number;
   position: number;
-  assignees?: TaskAssignee[];
   dueDate?: Date | null;
-};
-
-export interface TaskAssignee {
-  userId: number;
-  name: string;
+  assignees?: TaskAssignee[];
+  checklists?: TaskChecklist[]; 
 }

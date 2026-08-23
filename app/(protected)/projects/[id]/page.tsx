@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import { db } from '@/db';
-import { projects, boards, tasks, organizationMembers, taskAssignees, users } from '@/db/schema';
+import { projects, boards, tasks, organizationMembers, taskAssignees, users, taskChecklists } from '@/db/schema';
 import { eq, asc, inArray } from 'drizzle-orm';
 import { notFound } from 'next/navigation';
 import { Kanban, Plus, ArrowLeft } from 'lucide-react';
@@ -52,6 +52,8 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   const taskIds = rawTasks.map((t) => t.id);
 
   let assigneesData: any[] = [];
+  let checklistsData: any[] = [];
+
   if (taskIds.length > 0) {
     assigneesData = await db.select({
       taskId: taskAssignees.taskId,
@@ -61,6 +63,16 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
     .from(taskAssignees)
     .innerJoin(users, eq(taskAssignees.userId, users.id))
     .where(inArray(taskAssignees.taskId, taskIds));
+
+    checklistsData = await db.select({
+      id: taskChecklists.id,
+      taskId: taskChecklists.taskId,
+      title: taskChecklists.title,
+      isCompleted: taskChecklists.isCompleted,
+    })
+    .from(taskChecklists)
+    .where(inArray(taskChecklists.taskId, taskIds))
+    .orderBy(asc(taskChecklists.createdAt));
   }
 
   const projectBoards = await db.select()
@@ -73,6 +85,9 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
     assignees: assigneesData
       .filter((a) => a.taskId === task.id)
       .map((a) => ({ userId: a.userId, name: a.name })),
+    checklists: checklistsData
+      .filter((c) => c.taskId === task.id)
+      .map((c) => ({ id: c.id, title: c.title, isCompleted: c.isCompleted })),
   }));
 
   return (

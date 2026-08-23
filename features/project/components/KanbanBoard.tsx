@@ -10,7 +10,7 @@ import {
 import { moveTask } from "@/features/task/actions/taskActions";
 import { toast } from "sonner";
 import { TaskModal } from "@/features/task/components/TaskModal";
-import { Plus, MoreHorizontal } from "lucide-react";
+import { Plus, MoreHorizontal, CheckSquare } from "lucide-react";
 import { Task } from "@/features/task/types/task.types";
 
 type Board = { id: number; name: string; position: number };
@@ -64,6 +64,14 @@ export function KanbanBoard({
   useEffect(() => {
     setIsMounted(true);
     setTasks(initialTasks);
+
+    setModalState((prev) => {
+      if (prev.isOpen && prev.task) {
+        const updatedTask = initialTasks.find(t => t.id === prev.task!.id);
+        if (updatedTask) return { ...prev, task: updatedTask };
+      }
+      return prev;
+    });
   }, [initialTasks]);
 
   const onDragEnd = async (result: DropResult) => {
@@ -183,9 +191,30 @@ export function KanbanBoard({
                                 </p>
                               )}
 
+                              {task.checklists && task.checklists.length > 0 && (
+                              <div className="mt-3.5 mb-1">
+                                <div className="flex justify-between items-center mb-1.5 text-[11px] font-semibold text-gray-500">
+                                  <span className="flex items-center gap-1.5">
+                                    <CheckSquare size={12} className="text-gray-400" /> 
+                                    Progress
+                                  </span>
+                                  <span>
+                                    {task.checklists.filter(c => c.isCompleted).length}/{task.checklists.length}
+                                  </span>
+                                </div>
+                                <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                                  <div
+                                    className={`h-full rounded-full transition-all duration-500 ${
+                                      task.checklists.every(c => c.isCompleted) ? 'bg-emerald-500' : 'bg-indigo-500'
+                                    }`}
+                                    style={{ width: `${(task.checklists.filter(c => c.isCompleted).length / task.checklists.length) * 100}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+                            )}
+
                               {task.assignees && task.assignees.length > 0 && (
                                 <div className="mt-3 flex justify-end">
-                                  {/* -space-x-2 akan membuat avatar saling bertumpuk (overlap) */}
                                   <div className="flex -space-x-2 overflow-hidden">
                                     {task.assignees.map((assignee, i) => (
                                       <div

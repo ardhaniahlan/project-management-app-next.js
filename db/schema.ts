@@ -1,4 +1,4 @@
-import { pgTable, serial, varchar, text, timestamp, integer } from 'drizzle-orm/pg-core';
+import { pgTable, serial, varchar, text, timestamp, integer, boolean } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
@@ -71,5 +71,13 @@ export const activityLogs = pgTable('activity_logs', {
   organizationId: integer('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
   userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   action: text('action').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const taskChecklists = pgTable('task_checklists', {
+  id: serial('id').primaryKey(),
+  taskId: integer('task_id').notNull().references(() => tasks.id, { onDelete: 'cascade' }),
+  title: varchar('title', { length: 255 }).notNull(),
+  isCompleted: boolean('is_completed').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
