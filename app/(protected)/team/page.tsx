@@ -5,6 +5,7 @@ import { users, organizationMembers } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { Users as UsersIcon } from 'lucide-react';
 import { InviteMemberButton } from '@/features/team/components/InviteMemberButton';
+import { RoleSelector } from '@/features/team/components/RoleSelector';
 
 const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET);
 
@@ -67,13 +68,13 @@ export default async function TeamPage() {
                 <td className="px-6 py-4 font-medium text-gray-900">{member.name}</td>
                 <td className="px-6 py-4 text-gray-500">{member.email}</td>
                 <td className="px-6 py-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium capitalize ${
-                    member.role === 'owner' ? 'bg-purple-100 text-purple-700' :
-                    member.role === 'project_manager' ? 'bg-blue-100 text-blue-700' :
-                    'bg-gray-100 text-gray-700'
-                  }`}>
-                    {member.role.replace('_', ' ')}
-                  </span>
+                  <RoleSelector
+                    memberId={member.id}
+                    currentRole={member.role}
+                    organizationId={orgId}
+                    isOwner={isOwner}
+                    isSelf={member.id === userId}
+                  />
                 </td>
               </tr>
             ))}
