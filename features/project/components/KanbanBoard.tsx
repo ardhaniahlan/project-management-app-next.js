@@ -331,7 +331,7 @@ export function KanbanBoard({
                   )}
                 </Droppable>
 
-                {(userRole === "owner" || userRole === "project_manager") &&
+                {(userRole === "owner" || userRole === "project_manager") && !isReadOnly &&
                   board.name.toLowerCase() !== "done" && (
                     <button
                       onClick={() =>
