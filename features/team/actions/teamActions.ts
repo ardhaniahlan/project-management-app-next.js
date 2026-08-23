@@ -151,3 +151,43 @@ export async function updateMemberRole(organizationId: number, targetUserId: num
     return { error: 'Terjadi kesalahan sistem.' };
   }
 }
+
+export async function removeMember(organizationId: number, targetUserId: number) {
+  try {
+    const token = (await cookies()).get('auth_token')?.value;
+    if (!token) return { error: 'Sesi tidak valid.' };
+
+    const { payload } = await jwtVerify(token, SECRET_KEY);
+    const currentUserId = payload.userId as number;
+
+    const [inviter] = await db.select({ role: organizationMembers.role })
+      .from(organizationMembers)
+      .where(
+        and(
+          eq(organizationMembers.userId, currentUserId),
+          eq(organizationMembers.organizationId, organizationId)
+        )
+      );
+
+    if (!inviter || inviter.role !== 'owner') {
+      return { error: 'Akses ditolak. Hanya Owner yang dapat mengeluarkan anggota.' };
+    }
+
+    if (currentUserId === targetUserId) {
+      return { error: 'Anda tidak dapat mengeluarkan diri Anda sendiri. Silakan transfer kepemilikan terlebih dahulu.' };
+    }
+
+    await db.delete(organizationMembers)
+      .where(
+        and(
+          eq(organizationMembers.userId, targetUserId),
+          eq(organizationMembers.organizationId, organizationId)
+        )
+      );
+
+    revalidatePath('/team'); 
+    return { success: true };
+  } catch (error) {
+    return { error: 'Terjadi kesalahan sistem saat menghapus anggota.' };
+  }
+}

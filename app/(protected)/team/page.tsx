@@ -6,6 +6,7 @@ import { eq } from 'drizzle-orm';
 import { Users as UsersIcon } from 'lucide-react';
 import { InviteMemberButton } from '@/features/team/components/InviteMemberButton';
 import { RoleSelector } from '@/features/team/components/RoleSelector';
+import { RemoveMemberButton } from '@/features/team/components/RemoveMemberButton';
 
 const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET);
 
@@ -60,6 +61,7 @@ export default async function TeamPage() {
               <th className="px-6 py-4 font-medium">Nama Anggota</th>
               <th className="px-6 py-4 font-medium">Email</th>
               <th className="px-6 py-4 font-medium">Peran</th>
+              {isOwner && <th className="px-6 py-4 font-medium text-right">Aksi</th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -68,14 +70,29 @@ export default async function TeamPage() {
                 <td className="px-6 py-4 font-medium text-gray-900">{member.name}</td>
                 <td className="px-6 py-4 text-gray-500">{member.email}</td>
                 <td className="px-6 py-4">
-                  <RoleSelector
+                  <RoleSelector 
                     memberId={member.id}
                     currentRole={member.role}
                     organizationId={orgId}
                     isOwner={isOwner}
-                    isSelf={member.id === userId}
+                    isSelf={member.id === userId} 
                   />
                 </td>
+                
+                {isOwner && (
+                  <td className="px-6 py-4 text-right">
+                    {member.id !== userId ? (
+                      <RemoveMemberButton 
+                        memberId={member.id} 
+                        memberName={member.name || 'Anggota'} 
+                        organizationId={orgId} 
+                      />
+                    ) : (
+                      <span className="text-xs text-gray-400 italic">Anda</span>
+                    )}
+                  </td>
+                )}
+                
               </tr>
             ))}
           </tbody>
