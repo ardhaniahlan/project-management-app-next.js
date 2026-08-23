@@ -1,8 +1,8 @@
 'use server';
 
 import { db } from '@/db';
-import { projects, boards, organizationMembers } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { projects, boards, organizationMembers, users } from '@/db/schema';
+import { and, eq } from 'drizzle-orm';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import { revalidatePath } from 'next/cache';
@@ -33,7 +33,6 @@ export async function createProject(data: ProjectInput) {
       return { error: 'Hanya Pemilik atau Project Manager yang dapat membuat proyek.' };
     }
 
-    // 1. Simpan Proyek ke Database (Menggunakan 'title' sesuai skema Anda)
     const [newProject] = await db.insert(projects).values({
       title: data.name,
       description: data.description || '',
@@ -41,7 +40,6 @@ export async function createProject(data: ProjectInput) {
       status: 'active',
     }).returning();
 
-    // 2. Otomatis buat 3 kolom Kanban standar untuk proyek ini
     await db.insert(boards).values([
       { projectId: newProject.id, name: 'To Do', position: 1 },
       { projectId: newProject.id, name: 'In Progress', position: 2 },

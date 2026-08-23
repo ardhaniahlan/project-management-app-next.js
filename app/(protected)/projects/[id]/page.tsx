@@ -4,7 +4,7 @@ import { db } from '@/db';
 import { projects, boards, tasks, organizationMembers, taskAssignees, users, taskChecklists } from '@/db/schema';
 import { eq, asc, inArray } from 'drizzle-orm';
 import { notFound } from 'next/navigation';
-import { Kanban, Plus, ArrowLeft } from 'lucide-react';
+import { Kanban, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { KanbanBoard } from '@/features/project/components/KanbanBoard';
 
@@ -42,7 +42,18 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
     notFound();
   }
 
-  const project = currentProject[0];
+  const [project] = await db.select()
+    .from(projects)
+    .where(eq(projects.id, projectId));
+
+  const orgMembers = await db.select({
+    userId: users.id,
+    name: users.name,
+    role: organizationMembers.role,
+  })
+  .from(organizationMembers)
+  .innerJoin(users, eq(users.id, organizationMembers.userId))
+  .where(eq(organizationMembers.organizationId, project.organizationId));
 
   const rawTasks = await db.select()
     .from(tasks)
@@ -91,31 +102,63 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   }));
 
   return (
-    <div className="p-8 h-screen flex flex-col bg-gray-50/50">
-      
-      <div className="flex flex-col gap-4 mb-6">
-        <Link href="/projects" className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors w-fit">
-          <ArrowLeft size={16} />
-          Kembali ke Daftar Proyek
-        </Link>
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <Kanban className="text-indigo-600" />
-              {project.title}
-            </h1>
-            <p className="text-gray-500 text-sm mt-1">{project.description || 'Tidak ada deskripsi.'}</p>
+    <div className="h-screen flex flex-col bg-gray-50">
+      <div className="max-w-[1600px] w-full mx-auto flex flex-col h-full px-6 sm:px-8 py-6">
+
+        {/* Header — dikunci di atas, nggak ikut scroll */}
+        <div className="shrink-0 flex flex-col gap-4 pb-5 mb-5 border-b border-gray-200">
+          <Link
+            href="/projects"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors w-fit"
+          >
+            <ArrowLeft size={16} />
+            Kembali ke Daftar Proyek
+          </Link>
+
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <span className="w-9 h-9 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-700 shrink-0 mt-0.5">
+                <Kanban size={18} />
+              </span>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900 tracking-tight leading-tight">
+                  {project.title}
+                </h1>
+                <p className="text-gray-500 text-sm mt-1">
+                  {project.description || 'Tidak ada deskripsi.'}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 sm:pl-4">
+              <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">
+                Tim
+              </span>
+              <div className="flex -space-x-2 overflow-hidden">
+                {orgMembers.map((member, index) => (
+                  <div
+                    key={member.userId}
+                    className="w-8 h-8 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center text-xs font-bold text-indigo-700 shadow-sm cursor-pointer"
+                    style={{ zIndex: 10 - index }}
+                    title={`${member.name} (${member.role})`}
+                  >
+                    {member.name ? member.name.charAt(0).toUpperCase() : 'U'}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
+
+        <div className="flex-1 min-h-0">
+          <KanbanBoard
+            projectId={projectId}
+            boards={projectBoards}
+            initialTasks={projectTasks}
+            userRole={userOrg[0].role}
+          />
+        </div>
       </div>
-
-      <KanbanBoard 
-        projectId={projectId} 
-        boards={projectBoards} 
-        initialTasks={projectTasks}
-        userRole={userOrg[0].role} 
-      />
-
     </div>
   );
 }

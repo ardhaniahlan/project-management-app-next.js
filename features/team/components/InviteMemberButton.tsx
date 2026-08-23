@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { UserPlus, X, Mail, Shield, Search } from 'lucide-react';
+import { UserPlus, X, Shield, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { InviteInput, inviteSchema } from '../schema/teamSchema';
 import { inviteUserToTeam, searchUsersForInvite } from '../actions/teamActions';
