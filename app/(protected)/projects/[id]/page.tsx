@@ -200,6 +200,7 @@ export default async function ProjectDetailPage({
           boards={projectBoards}
           initialTasks={projectTasks}
           userRole={userOrg[0].role}
+          isReadOnly={project.status === 'completed' || project.status === 'archived'}
         />
       </div>
     </div>

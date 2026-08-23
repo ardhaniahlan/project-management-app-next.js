@@ -40,6 +40,7 @@ interface TaskModalProps {
   boardId: number;
   task: Task | null;
   userRole: string;
+  isReadOnly?: boolean;
 }
 
 const priorityBadge = (priority: string) => {
@@ -61,6 +62,7 @@ export function TaskModal({
   boardId,
   task,
   userRole,
+  isReadOnly,
 }: TaskModalProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [view, setView] = useState<"detail" | "form">(
@@ -292,25 +294,29 @@ export function TaskModal({
                             type="checkbox"
                             checked={checklist.isCompleted}
                             onChange={() =>
+                              !isReadOnly &&
                               handleToggleChecklist(
                                 checklist.id,
                                 checklist.isCompleted,
                               )
                             }
-                            className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                            disabled={isReadOnly}
+                            className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-600 disabled:opacity-50"
                           />
                           <span
                             className={`text-sm ${checklist.isCompleted ? "text-gray-400 line-through" : "text-gray-700"}`}
                           >
                             {checklist.title}
                           </span>
-                          <button
-                            onClick={() => handleDeleteChecklist(checklist.id)}
-                            className="ml-auto text-gray-400 hover:text-red-600"
-                            title="Hapus item"
-                          >
-                            <Trash2 size={14} />
-                          </button>
+                          {userRole !== "member" && !isReadOnly && (
+                            <button
+                              onClick={() => handleDeleteChecklist(checklist.id)}
+                              className="ml-auto text-gray-400 hover:text-red-600"
+                              title="Hapus item"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          )}
                         </div>
                       ))
                     ) : (
@@ -320,7 +326,7 @@ export function TaskModal({
                     )}
                   </div>
 
-                  {userRole !== "member" && (
+                  {userRole !== "member" && !isReadOnly && (
                     <div className="mt-3 flex gap-2">
                       <input
                         type="text"
@@ -356,26 +362,29 @@ export function TaskModal({
               </div>
             </div>
 
-            {mode === "edit" && userRole !== "member" && !isDeleting && (
-              <div className="p-6 pt-4 border-t border-gray-100 flex gap-3 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setIsDeleting(true)}
-                  className="flex-1 px-4 py-2.5 bg-red-50 text-red-600 font-medium rounded-xl hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
-                >
-                  <Trash2 size={17} />
-                  Hapus
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setView("form")}
-                  className="flex-1 px-4 py-2.5 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2"
-                >
-                  <Pencil size={17} />
-                  Edit Tugas
-                </button>
-              </div>
-            )}
+            {mode === "edit" &&
+              userRole !== "member" &&
+              !isDeleting &&
+              !isReadOnly && (
+                <div className="p-6 pt-4 border-t border-gray-100 flex gap-3 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setIsDeleting(true)}
+                    className="flex-1 px-4 py-2.5 bg-red-50 text-red-600 font-medium rounded-xl hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Trash2 size={17} />
+                    Hapus
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setView("form")}
+                    className="flex-1 px-4 py-2.5 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Pencil size={17} />
+                    Edit Tugas
+                  </button>
+                </div>
+              )}
           </>
         ) : (
           <form
@@ -546,7 +555,7 @@ export function TaskModal({
                 {userRole === "member" ? "Tutup" : "Batal"}
               </button>
 
-              {userRole !== "member" && (
+              {userRole !== "member" && !isReadOnly && (
                 <button
                   type="submit"
                   disabled={isSubmitting}

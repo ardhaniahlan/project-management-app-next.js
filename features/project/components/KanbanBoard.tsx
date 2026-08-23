@@ -21,6 +21,7 @@ interface KanbanBoardProps {
   boards: Board[];
   initialTasks: Task[];
   userRole: string;
+  isReadOnly?: boolean;
 }
 
 const statusDotColor = (boardName: string) => {
@@ -46,6 +47,7 @@ export function KanbanBoard({
   boards,
   initialTasks,
   userRole,
+  isReadOnly = false,
 }: KanbanBoardProps) {
   const [tasks, setTasks] = useState(initialTasks);
   const [isMounted, setIsMounted] = useState(false);
@@ -80,6 +82,11 @@ export function KanbanBoard({
   }, [initialTasks]);
 
   const onDragEnd = async (result: DropResult) => {
+    if (isReadOnly) {
+      toast.info('Proyek ini sudah selesai dan tidak dapat diubah.');
+      return; 
+    }
+
     const { destination, source, draggableId } = result;
 
     if (!destination) return;
@@ -109,7 +116,6 @@ export function KanbanBoard({
 
   return (
     <div className="h-full flex flex-col">
-      {/* Search & filter — dikunci di atas area board */}
       <div className="shrink-0 mb-4 flex flex-col sm:flex-row gap-3 items-center">
         <div className="relative flex-1 w-full">
           <Search
@@ -157,7 +163,6 @@ export function KanbanBoard({
         </div>
       </div>
 
-      {/* Board — ngisi sisa tinggi, tiap kolom scroll sendiri */}
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="flex-1 min-h-0 flex gap-5 overflow-x-auto items-stretch">
           {boards.map((board) => {
@@ -356,6 +361,7 @@ export function KanbanBoard({
           boardId={modalState.boardId}
           task={modalState.task}
           userRole={userRole}
+          isReadOnly={isReadOnly}
         />
       </DragDropContext>
     </div>
