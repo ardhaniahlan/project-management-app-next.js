@@ -9,6 +9,7 @@ import {
   taskAssignees,
   users,
   taskChecklists,
+  taskComments,
 } from "@/db/schema";
 import { eq, asc, inArray } from "drizzle-orm";
 import { notFound } from "next/navigation";
@@ -83,6 +84,7 @@ export default async function ProjectDetailPage({
 
   let assigneesData: any[] = [];
   let checklistsData: any[] = [];
+  let commentsData: any[] = [];
 
   if (taskIds.length > 0) {
     assigneesData = await db
@@ -105,6 +107,14 @@ export default async function ProjectDetailPage({
       .from(taskChecklists)
       .where(inArray(taskChecklists.taskId, taskIds))
       .orderBy(asc(taskChecklists.createdAt));
+    
+    commentsData = await db
+      .select({
+        taskId: taskComments.taskId,
+        id: taskComments.id,
+      })
+      .from(taskComments)
+      .where(inArray(taskComments.taskId, taskIds));
   }
 
   const projectBoards = await db
@@ -121,89 +131,94 @@ export default async function ProjectDetailPage({
     checklists: checklistsData
       .filter((c) => c.taskId === task.id)
       .map((c) => ({ id: c.id, title: c.title, isCompleted: c.isCompleted })),
+    commentCount: commentsData
+      .filter((c) => c.taskId === task.id)
+      .length,
   }));
 
   return (
-  <div className="h-screen flex flex-col bg-gray-50">
-    <div className="max-w-[1600px] w-full mx-auto flex flex-col h-full px-6 sm:px-8 py-6">
-      <div className="shrink-0 flex flex-col gap-4 pb-5 mb-5 border-b border-gray-200">
-        <Link
-          href="/projects"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors w-fit"
-        >
-          <ArrowLeft size={16} />
-          Kembali ke Daftar Proyek
-        </Link>
+    <div className="h-screen flex flex-col bg-gray-50">
+      <div className="max-w-[1600px] w-full mx-auto flex flex-col h-full px-6 sm:px-8 py-6">
+        <div className="shrink-0 flex flex-col gap-4 pb-5 mb-5 border-b border-gray-200">
+          <Link
+            href="/projects"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors w-fit"
+          >
+            <ArrowLeft size={16} />
+            Kembali ke Daftar Proyek
+          </Link>
 
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div className="flex items-start gap-3 min-w-0">
-            <span className="w-9 h-9 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-700 shrink-0 mt-0.5">
-              <Kanban size={18} />
-            </span>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2.5 mb-1">
-                <h1 className="text-xl font-bold text-gray-900 tracking-tight truncate">
-                  {project.title}
-                </h1>
-                <span
-                  className={`shrink-0 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide rounded-md ${
-                    project.status === "completed"
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-blue-100 text-blue-700"
-                  }`}
-                >
-                  {project.status === "completed" ? "Selesai" : "Aktif"}
-                </span>
-              </div>
-              <p className="text-sm text-gray-500 line-clamp-1">
-                {project.description || "Tidak ada deskripsi."}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4 shrink-0">
-            <div className="flex items-center gap-2.5">
-              <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">
-                Tim
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="flex items-start gap-3 min-w-0">
+              <span className="w-9 h-9 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-700 shrink-0 mt-0.5">
+                <Kanban size={18} />
               </span>
-              <div className="flex -space-x-2 overflow-hidden">
-                {orgMembers.map((member, index) => (
-                  <div
-                    key={member.userId}
-                    className="w-8 h-8 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center text-xs font-bold text-indigo-700 shadow-sm cursor-pointer"
-                    style={{ zIndex: 10 - index }}
-                    title={`${member.name} (${member.role})`}
+              <div className="min-w-0">
+                <div className="flex items-center gap-2.5 mb-1">
+                  <h1 className="text-xl font-bold text-gray-900 tracking-tight truncate">
+                    {project.title}
+                  </h1>
+                  <span
+                    className={`shrink-0 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide rounded-md ${
+                      project.status === "completed"
+                        ? "bg-emerald-100 text-emerald-700"
+                        : "bg-blue-100 text-blue-700"
+                    }`}
                   >
-                    {member.name ? member.name.charAt(0).toUpperCase() : "U"}
-                  </div>
-                ))}
+                    {project.status === "completed" ? "Selesai" : "Aktif"}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-500 line-clamp-1">
+                  {project.description || "Tidak ada deskripsi."}
+                </p>
               </div>
             </div>
 
-            {(userOrg[0].role === "owner" ||
-              userOrg[0].role === "project_manager") && (
-              <div className="pl-4 border-l border-gray-200">
-                <ProjectStatusButton
-                  projectId={project.id}
-                  organizationId={project.organizationId}
-                  currentStatus={project.status}
-                />
+            <div className="flex items-center gap-4 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">
+                  Tim
+                </span>
+                <div className="flex -space-x-2 overflow-hidden">
+                  {orgMembers.map((member, index) => (
+                    <div
+                      key={member.userId}
+                      className="w-8 h-8 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center text-xs font-bold text-indigo-700 shadow-sm cursor-pointer"
+                      style={{ zIndex: 10 - index }}
+                      title={`${member.name} (${member.role})`}
+                    >
+                      {member.name ? member.name.charAt(0).toUpperCase() : "U"}
+                    </div>
+                  ))}
+                </div>
               </div>
-            )}
+
+              {(userOrg[0].role === "owner" ||
+                userOrg[0].role === "project_manager") && (
+                <div className="pl-4 border-l border-gray-200">
+                  <ProjectStatusButton
+                    projectId={project.id}
+                    organizationId={project.organizationId}
+                    currentStatus={project.status}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="flex-1 min-h-0">
-        <KanbanBoard
-          projectId={projectId}
-          boards={projectBoards}
-          initialTasks={projectTasks}
-          userRole={userOrg[0].role}
-          isReadOnly={project.status === 'completed' || project.status === 'archived'}
-        />
+        <div className="flex-1 min-h-0">
+          <KanbanBoard
+            projectId={projectId}
+            boards={projectBoards}
+            initialTasks={projectTasks}
+            userRole={userOrg[0].role}
+            isReadOnly={
+              project.status === "completed" || project.status === "archived"
+            }
+          />
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
 }

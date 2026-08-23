@@ -20,4 +20,5 @@ export interface Task {
   dueDate?: Date | null;
   assignees?: TaskAssignee[];
   checklists?: TaskChecklist[]; 
+  commentCount: number;
 }

@@ -16,6 +16,8 @@ import {
   Pencil,
   User,
   CheckSquare,
+  Send,
+  MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 import { TaskInput, taskSchema } from "../schema/taskSchema";
@@ -31,6 +33,10 @@ import {
   deleteChecklist,
   toggleChecklist,
 } from "../actions/checklistActions";
+import {
+  addTaskComment,
+  getCommentsByTaskId,
+} from "@/features/comment/actions/commentActions";
 
 interface TaskModalProps {
   isOpen: boolean;
@@ -76,6 +82,11 @@ export function TaskModal({
   const [pendingChecklists, setPendingChecklists] = useState<string[]>([]);
   const [pendingInput, setPendingInput] = useState("");
 
+  const [comments, setComments] = useState<any[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [isLoadingComments, setIsLoadingComments] = useState(false);
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -94,6 +105,20 @@ export function TaskModal({
       fetchMembers();
     }
   }, [isOpen, projectId]);
+
+  useEffect(() => {
+    if (isOpen && view === "detail" && task) {
+      const fetchComments = async () => {
+        setIsLoadingComments(true);
+        const res = await getCommentsByTaskId(task.id);
+        if (res.success && res.data) {
+          setComments(res.data);
+        }
+        setIsLoadingComments(false);
+      };
+      fetchComments();
+    }
+  }, [isOpen, view, task]);
 
   useEffect(() => {
     if (isOpen) {
@@ -131,6 +156,23 @@ export function TaskModal({
   }, [isOpen, mode, task, boardId, projectId, reset]);
 
   if (!isOpen) return null;
+
+  const handleSubmitComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim() || !task) return;
+
+    setIsSubmittingComment(true);
+    const res = await addTaskComment(task.id, newComment, projectId);
+
+    if (res?.error) {
+      toast.error(res.error);
+    } else {
+      setNewComment("");
+      const refreshRes = await getCommentsByTaskId(task.id);
+      if (refreshRes.success && refreshRes.data) setComments(refreshRes.data);
+    }
+    setIsSubmittingComment(false);
+  };
 
   const handleAddChecklist = async () => {
     if (!newChecklist.trim() || !task) return;
@@ -310,7 +352,9 @@ export function TaskModal({
                           </span>
                           {userRole !== "member" && !isReadOnly && (
                             <button
-                              onClick={() => handleDeleteChecklist(checklist.id)}
+                              onClick={() =>
+                                handleDeleteChecklist(checklist.id)
+                              }
                               className="ml-auto text-gray-400 hover:text-red-600"
                               title="Hapus item"
                             >
@@ -358,6 +402,84 @@ export function TaskModal({
                       </span>
                     )}
                   </p>
+                </div>
+              </div>
+
+              <div className="mt-8 pt-6 border-t border-gray-100">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-1.5">
+                  <MessageSquare size={13} /> Komentar Tim ({comments.length})
+                </p>
+
+                {!isReadOnly && (
+                  <form
+                    onSubmit={handleSubmitComment}
+                    className="mb-6 flex gap-3"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
+                      <User size={14} className="text-indigo-600" />
+                    </div>
+                    <div className="flex-1 flex gap-2">
+                      <input
+                        type="text"
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        placeholder="Tulis komentar..."
+                        disabled={isSubmittingComment}
+                        className="flex-1 px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:bg-white transition-colors"
+                      />
+                      <button
+                        type="submit"
+                        disabled={!newComment.trim() || isSubmittingComment}
+                        className="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors flex items-center gap-1.5 text-sm font-medium"
+                      >
+                        {isSubmittingComment ? (
+                          "..."
+                        ) : (
+                          <>
+                            <Send size={14} /> Kirim
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                <div className="space-y-4">
+                  {isLoadingComments ? (
+                    <p className="text-sm text-gray-400 text-center py-2">
+                      Memuat komentar...
+                    </p>
+                  ) : comments.length === 0 ? (
+                    <p className="text-sm text-gray-400 italic text-center py-4 bg-gray-50 rounded-lg border border-gray-100 border-dashed">
+                      Belum ada diskusi di tugas ini.
+                    </p>
+                  ) : (
+                    comments.map((comment) => (
+                      <div key={comment.id} className="flex gap-3">
+                        <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-600 font-bold text-xs flex items-center justify-center shrink-0 uppercase">
+                          {comment.user.name
+                            ? comment.user.name.charAt(0)
+                            : "U"}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-baseline gap-2 mb-1">
+                            <span className="font-semibold text-gray-900 text-sm">
+                              {comment.user.name}
+                            </span>
+                            <span className="text-[11px] text-gray-400">
+                              {new Date(comment.createdAt).toLocaleDateString(
+                                "id-ID",
+                                { hour: "2-digit", minute: "2-digit" },
+                              )}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-tr-lg rounded-b-lg border border-gray-100">
+                            {comment.body}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
