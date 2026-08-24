@@ -25,6 +25,7 @@ import {
   Plus,
   Activity,
   CheckCircle2,
+  Building2,
 } from "lucide-react";
 import StatCard from "@/features/globals/components/StatCard";
 
@@ -95,7 +96,34 @@ export default async function DashboardPage() {
 
   if (!hasOrganization) {
     return (
-      <div className="h-full flex flex-col items-center justify-center p-8 text-center max-w-md mx-auto"></div>
+      <div className="min-h-[80vh] flex flex-col items-center justify-center p-8 text-center max-w-md mx-auto">
+        <div className="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mb-6 border-8 border-indigo-50/50">
+          <Building2 size={36} />
+        </div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-3 tracking-tight">
+          Selamat Datang, {userName}!
+        </h2>
+        <p className="text-gray-500 mb-8 leading-relaxed">
+          Sepertinya Anda belum tergabung dalam organisasi mana pun. Silakan tunggu admin mengundang Anda ke ruang kerja mereka, atau buat organisasi Anda sendiri untuk memulai.
+        </p>
+        
+        <div className="flex flex-col w-full gap-3">
+          <Link
+            href="/onboarding"
+            className="w-full px-5 py-3 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-colors shadow-sm flex items-center justify-center gap-2"
+          >
+            <Plus size={18} />
+            Buat Organisasi Baru
+          </Link>
+          
+          <Link
+            href="/dashboard"
+            className="w-full px-5 py-3 bg-white border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors"
+          >
+            Muat Ulang Halaman
+          </Link>
+        </div>
+      </div>
     );
   }
 
