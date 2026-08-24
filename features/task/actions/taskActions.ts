@@ -8,12 +8,14 @@ import {
   taskAssignees,
   users,
   taskChecklists,
+  boards,
 } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
 import { revalidatePath } from "next/cache";
 import { TaskInput } from "../schema/taskSchema";
+import { logActivity } from "@/features/activitylog/actions/logActions";
 
 const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET);
 
@@ -85,9 +87,9 @@ export async function createTask(data: TaskInput) {
     }
 
     if (data.checklists && data.checklists.length > 0) {
-      const checklistToInsert = data.checklists.map(title => ({
+      const checklistToInsert = data.checklists.map((title) => ({
         taskId: newTask.id,
-        title: title
+        title: title,
       }));
       await db.insert(taskChecklists).values(checklistToInsert);
     }
@@ -109,10 +111,37 @@ export async function moveTask(
   if (!token) return { error: "Sesi tidak valid." };
 
   try {
+    const { payload } = await jwtVerify(token, SECRET_KEY);
+    const userId = payload.userId as number;
+
+    const [taskInfo] = await db
+      .select({ title: tasks.title })
+      .from(tasks)
+      .where(eq(tasks.id, taskId));
+    const [boardInfo] = await db
+      .select({ name: boards.name })
+      .from(boards)
+      .where(eq(boards.id, newBoardId));
+    const [projectInfo] = await db.select({ 
+      organizationId: projects.organizationId,
+      title: projects.title
+    }).from(projects).where(eq(projects.id, projectId));
+
     await db
       .update(tasks)
       .set({ boardId: newBoardId })
       .where(eq(tasks.id, taskId));
+
+    if (taskInfo && boardInfo && projectInfo) {
+      const actionMessage = `memindahkan tugas "${taskInfo.title}" ke kolom "${boardInfo.name}"`;
+
+      await logActivity(
+        projectInfo.organizationId,
+        userId,
+        actionMessage,
+        projectId,
+      );
+    }
 
     revalidatePath(`/projects/${projectId}`);
     return { success: true };

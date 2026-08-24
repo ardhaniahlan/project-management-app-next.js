@@ -69,6 +69,7 @@ export const taskComments = pgTable('task_comments', {
 export const activityLogs = pgTable('activity_logs', {
   id: serial('id').primaryKey(),
   organizationId: integer('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  projectId: integer('project_id'),
   userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   action: text('action').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
