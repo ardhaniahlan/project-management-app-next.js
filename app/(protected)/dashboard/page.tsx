@@ -183,7 +183,7 @@ export default async function DashboardPage() {
     .leftJoin(projects, eq(activityLogs.projectId, projects.id))
     .where(eq(activityLogs.organizationId, orgId))
     .orderBy(desc(activityLogs.createdAt))
-    .limit(10);
+    .limit(7);
 
   return (
     <div className="p-8 max-w-7xl mx-auto flex flex-col gap-6">
@@ -201,220 +201,225 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {userRole === "owner" && (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <StatCard
-              title="Total Proyek"
-              value={orgProjects.length.toString()}
-              icon={<FolderKanban className="text-blue-700" size={16} />}
-              bg="bg-blue-100"
-            />
-            <StatCard
-              title="Anggota Tim"
-              value={orgMembers.length.toString()}
-              icon={<Users className="text-violet-700" size={16} />}
-              bg="bg-violet-100"
-            />
-            <StatCard
-              title="Rata-rata Penyelesaian"
-              value={`${completionRate}%`}
-              icon={<CheckCircle2 className="text-emerald-700" size={16} />}
-              bg="bg-emerald-100"
-            />
-          </div>
-          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5">
-            <h2 className="text-sm font-semibold text-gray-900 mb-3">
-              Daftar Proyek Aktif
-            </h2>
-            {orgProjects.length === 0 ? (
-              <div className="text-center py-10 text-gray-400 text-sm">
-                Belum ada proyek.
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        <div className="lg:col-span-2 flex flex-col gap-6">
+          {userRole === "owner" && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <StatCard
+                  title="Total Proyek"
+                  value={orgProjects.length.toString()}
+                  icon={<FolderKanban className="text-blue-700" size={16} />}
+                  bg="bg-blue-100"
+                />
+                <StatCard
+                  title="Anggota Tim"
+                  value={orgMembers.length.toString()}
+                  icon={<Users className="text-violet-700" size={16} />}
+                  bg="bg-violet-100"
+                />
+                <StatCard
+                  title="Rata-rata Penyelesaian"
+                  value={`${completionRate}%`}
+                  icon={<CheckCircle2 className="text-emerald-700" size={16} />}
+                  bg="bg-emerald-100"
+                />
               </div>
-            ) : (
-              <div className="space-y-3">
-                {orgProjects.map((proj) => (
-                  <Link
-                    key={proj.id}
-                    href={`/projects/${proj.id}`}
-                    className="block p-3 border border-gray-100 rounded-lg hover:border-indigo-200 hover:bg-indigo-50/50 transition-colors"
-                  >
-                    <h3 className="font-semibold text-gray-800 text-sm">
-                      {proj.title}
-                    </h3>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        </>
-      )}
-
-      {userRole === "project_manager" && (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <StatCard
-              title="Proyek Dikelola"
-              value={orgProjects.length.toString()}
-              icon={<LayoutDashboard className="text-blue-700" size={16} />}
-              bg="bg-blue-100"
-            />
-            <StatCard
-              title="Total Tugas Aktif"
-              value={(totalTasksCount - completedTasksCount).toString()}
-              icon={<Timer className="text-amber-700" size={16} />}
-              bg="bg-amber-100"
-            />
-            <StatCard
-              title="Tugas Prioritas Tinggi"
-              value={highPriorityTasks.toString()}
-              icon={<AlertCircle className="text-red-700" size={16} />}
-              bg="bg-red-100"
-            />
-          </div>
-        </>
-      )}
-
-      {userRole === "member" && (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <StatCard
-              title="Tugas Saya Hari Ini"
-              value={myTasksToday.toString()}
-              icon={<CheckCircle2 className="text-emerald-700" size={16} />}
-              bg="bg-emerald-100"
-            />
-            <StatCard
-              title="Tugas Mendatang"
-              value={myTasksUpcoming.toString()}
-              icon={<Clock className="text-blue-700" size={16} />}
-              bg="bg-blue-100"
-            />
-            <StatCard
-              title="Tugas Terlambat"
-              value={myTasksOverdue.toString()}
-              icon={<AlertCircle className="text-red-700" size={16} />}
-              bg="bg-red-100"
-            />
-          </div>
-
-          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5">
-            <h2 className="text-sm font-semibold text-gray-900 mb-3">
-              Daftar Pekerjaan Saya (Belum Selesai)
-            </h2>
-            {myUnfinishedTasks.length === 0 ? (
-              <div className="text-center py-10 text-gray-400 text-sm">
-                Hore! Tidak ada tugas yang tertunda.
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {myUnfinishedTasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className="flex justify-between items-center p-3 border border-gray-100 rounded-lg"
-                  >
-                    <div>
-                      <h3 className="font-semibold text-gray-800 text-sm">
-                        {task.title}
-                      </h3>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Proyek: {task.projectName}
-                      </p>
-                    </div>
-                    <span className="text-xs px-2.5 py-1 bg-indigo-50 text-indigo-700 font-medium rounded-md">
-                      Posisi: {task.boardName}
-                    </span>
+              <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5">
+                <h2 className="text-sm font-semibold text-gray-900 mb-3">
+                  Daftar Proyek Aktif
+                </h2>
+                {orgProjects.length === 0 ? (
+                  <div className="text-center py-10 text-gray-400 text-sm">
+                    Belum ada proyek.
                   </div>
-                ))}
+                ) : (
+                  <div className="space-y-3">
+                    {orgProjects.map((proj) => (
+                      <Link
+                        key={proj.id}
+                        href={`/projects/${proj.id}`}
+                        className="block p-3 border border-gray-100 rounded-lg hover:border-indigo-200 hover:bg-indigo-50/50 transition-colors"
+                      >
+                        <h3 className="font-semibold text-gray-800 text-sm">
+                          {proj.title}
+                        </h3>
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </div>
+            </>
+          )}
+
+          {userRole === "project_manager" && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <StatCard
+                title="Proyek Dikelola"
+                value={orgProjects.length.toString()}
+                icon={<LayoutDashboard className="text-blue-700" size={16} />}
+                bg="bg-blue-100"
+              />
+              <StatCard
+                title="Total Tugas Aktif"
+                value={(totalTasksCount - completedTasksCount).toString()}
+                icon={<Timer className="text-amber-700" size={16} />}
+                bg="bg-amber-100"
+              />
+              <StatCard
+                title="Tugas Prioritas Tinggi"
+                value={highPriorityTasks.toString()}
+                icon={<AlertCircle className="text-red-700" size={16} />}
+                bg="bg-red-100"
+              />
+            </div>
+          )}
+
+          {userRole === "member" && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <StatCard
+                  title="Tugas Saya Hari Ini"
+                  value={myTasksToday.toString()}
+                  icon={<CheckCircle2 className="text-emerald-700" size={16} />}
+                  bg="bg-emerald-100"
+                />
+                <StatCard
+                  title="Tugas Mendatang"
+                  value={myTasksUpcoming.toString()}
+                  icon={<Clock className="text-blue-700" size={16} />}
+                  bg="bg-blue-100"
+                />
+                <StatCard
+                  title="Tugas Terlambat"
+                  value={myTasksOverdue.toString()}
+                  icon={<AlertCircle className="text-red-700" size={16} />}
+                  bg="bg-red-100"
+                />
+              </div>
+
+              <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5">
+                <h2 className="text-sm font-semibold text-gray-900 mb-3">
+                  Daftar Pekerjaan Saya (Belum Selesai)
+                </h2>
+                {myUnfinishedTasks.length === 0 ? (
+                  <div className="text-center py-10 text-gray-400 text-sm">
+                    Hore! Tidak ada tugas yang tertunda.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {myUnfinishedTasks.map((task) => (
+                      <div
+                        key={task.id}
+                        className="flex justify-between items-center p-3 border border-gray-100 rounded-lg"
+                      >
+                        <div>
+                          <h3 className="font-semibold text-gray-800 text-sm">
+                            {task.title}
+                          </h3>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Proyek: {task.projectName}
+                          </p>
+                        </div>
+                        <span className="text-xs px-2.5 py-1 bg-indigo-50 text-indigo-700 font-medium rounded-md">
+                          Posisi: {task.boardName}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Kolom kanan — activity log, sticky */}
+        <div className="lg:col-span-1 lg:sticky lg:top-6">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5 flex flex-col">
+            <h2 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2 shrink-0">
+              Aktivitas Terkini
+            </h2>
+
+            {recentActivities.length === 0 ? (
+              <div className="text-center py-10 text-gray-400 text-sm">
+                Belum ada aktivitas terekam.
+              </div>
+            ) : (
+              (() => {
+                let lastGroup = "";
+
+                return (
+                  <div className="space-y-0 overflow-y-auto max-h-[calc(100vh-140px)] pr-2">
+                    {recentActivities.map((log, index) => {
+                      const logDate = new Date(log.createdAt);
+                      const currentGroup = groupLabel(logDate);
+                      const showGroupHeader = currentGroup !== lastGroup;
+                      lastGroup = currentGroup;
+
+                      const color = avatarColor(log.userName || "U");
+                      const { Icon, className: iconClass } = actionIcon(log.action);
+
+                      return (
+                        <div key={log.id}>
+                          {showGroupHeader && (
+                            <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-3 mt-4 first:mt-0">
+                              {currentGroup}
+                            </p>
+                          )}
+
+                          <div className="flex gap-3 text-sm">
+                            <div className="flex flex-col items-center shrink-0">
+                              <div
+                                className={`w-7 h-7 rounded-full ${color.bg} ${color.text} font-bold flex items-center justify-center text-xs relative`}
+                              >
+                                {log.userName ? log.userName.charAt(0) : "U"}
+                                <span
+                                  className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center border-2 border-white ${iconClass}`}
+                                >
+                                  <Icon size={9} />
+                                </span>
+                              </div>
+                              {index < recentActivities.length - 1 && (
+                                <div className="w-px flex-1 bg-gray-100 my-1.5" />
+                              )}
+                            </div>
+
+                            <div className="flex-1 pb-4 last:pb-0">
+                              <p className="text-gray-800 leading-relaxed">
+                                <span className="font-semibold">
+                                  {log.userName}
+                                </span>{" "}
+                                {log.action}
+                              </p>
+
+                              <div className="flex items-center gap-2 mt-1.5">
+                                <p className="text-xs text-gray-400">
+                                  {logDate.toLocaleTimeString("id-ID", {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
+                                </p>
+
+                                {log.projectName && (
+                                  <>
+                                    <span className="text-gray-300 text-xs">•</span>
+                                    <span className="text-[10px] font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md">
+                                      {log.projectName}
+                                    </span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()
             )}
           </div>
-        </>
-      )}
-
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5">
-        <h2 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          Aktivitas Terkini (Seluruh Tim)
-        </h2>
-
-        {recentActivities.length === 0 ? (
-          <div className="text-center py-10 text-gray-400 text-sm">
-            Belum ada aktivitas terekam.
-          </div>
-        ) : (
-          (() => {
-            let lastGroup = "";
-
-            return (
-              <div className="space-y-0">
-                {recentActivities.map((log, index) => {
-                  const logDate = new Date(log.createdAt);
-                  const currentGroup = groupLabel(logDate);
-                  const showGroupHeader = currentGroup !== lastGroup;
-                  lastGroup = currentGroup;
-
-                  const color = avatarColor(log.userName || "U");
-                  const { Icon, className: iconClass } = actionIcon(log.action);
-
-                  return (
-                    <div key={log.id}>
-                      {showGroupHeader && (
-                        <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-3 mt-4 first:mt-0">
-                          {currentGroup}
-                        </p>
-                      )}
-
-                      <div className="flex gap-3 text-sm">
-                        <div className="flex flex-col items-center shrink-0">
-                          <div
-                            className={`w-7 h-7 rounded-full ${color.bg} ${color.text} font-bold flex items-center justify-center text-xs relative`}
-                          >
-                            {log.userName ? log.userName.charAt(0) : "U"}
-                            <span
-                              className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center border-2 border-white ${iconClass}`}
-                            >
-                              <Icon size={9} />
-                            </span>
-                          </div>
-                          {index < recentActivities.length - 1 && (
-                            <div className="w-px flex-1 bg-gray-100 my-1.5" />
-                          )}
-                        </div>
-
-                        <div className="flex-1 pb-4 last:pb-0">
-                          <p className="text-gray-800 leading-relaxed">
-                            <span className="font-semibold">
-                              {log.userName}
-                            </span>{" "}
-                            {log.action}
-                          </p>
-
-                          <div className="flex items-center gap-2 mt-1.5">
-                            <p className="text-xs text-gray-400">
-                              {logDate.toLocaleTimeString("id-ID", {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                            </p>
-
-                            {log.projectName && (
-                              <>
-                                <span className="text-gray-300 text-xs">•</span>
-                                <span className="text-[10px] font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md">
-                                  Proyek: {log.projectName}
-                                </span>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })()
-        )}
+        </div>
       </div>
     </div>
   );
