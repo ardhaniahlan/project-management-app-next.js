@@ -8,6 +8,7 @@ import { jwtVerify } from "jose";
 import { revalidatePath } from "next/cache";
 import { ProjectInput } from "../schema/projectSchema";
 import { logActivity } from "@/features/activitylog/actions/logActions";
+import { redirect } from "next/navigation";
 
 const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET);
 
@@ -112,4 +113,43 @@ export async function updateProjectStatus(
   } catch (error) {
     return { error: "Terjadi kesalahan sistem." };
   }
+}
+
+export async function deleteProject(projectId: number, organizationId: number) {
+  try {
+    const token = (await cookies()).get("auth_token")?.value;
+    if (!token) return { error: "Sesi tidak valid." };
+
+    const { payload } = await jwtVerify(token, SECRET_KEY);
+    const currentUserId = payload.userId as number;
+
+    const [userOrg] = await db
+      .select({ role: organizationMembers.role })
+      .from(organizationMembers)
+      .where(
+        and(
+          eq(organizationMembers.userId, Number(currentUserId)),
+          eq(organizationMembers.organizationId, organizationId)
+        )
+      );
+
+    if (!userOrg || userOrg.role !== "owner") {
+      return { error: "Akses ditolak. Hanya Owner yang dapat menghapus proyek permanen." };
+    }
+
+    const [proj] = await db.select({ title: projects.title }).from(projects).where(eq(projects.id, projectId));
+
+    await db.delete(projects).where(eq(projects.id, projectId));
+
+    if (proj) {
+      await logActivity(organizationId, currentUserId, `menghapus proyek "${proj.title}" secara permanen`);
+    }
+
+  } catch (error) {
+    console.error("Gagal menghapus proyek:", error);
+    return { error: "Terjadi kesalahan sistem saat menghapus proyek." };
+  }
+
+  revalidatePath('/dashboard');
+  redirect("/projects")
 }

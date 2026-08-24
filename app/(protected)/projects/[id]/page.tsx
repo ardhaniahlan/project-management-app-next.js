@@ -17,6 +17,7 @@ import { Kanban, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { KanbanBoard } from "@/features/project/components/KanbanBoard";
 import { ProjectStatusButton } from "@/features/project/components/ProjectStatusButton";
+import { DeleteProjectButton } from "@/features/project/components/DeleteProjectButton";
 
 const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET);
 
@@ -193,14 +194,23 @@ export default async function ProjectDetailPage({
                 </div>
               </div>
 
-              {(userOrg[0].role === "owner" ||
-                userOrg[0].role === "project_manager") && (
-                <div className="pl-4 border-l border-gray-200">
+              {(userOrg[0].role === "owner" || userOrg[0].role === "project_manager") && (
+                <div className="pl-4 border-l border-gray-200 flex items-center gap-3">
+                  
                   <ProjectStatusButton
                     projectId={project.id}
                     organizationId={project.organizationId}
                     currentStatus={project.status}
                   />
+
+                  {userOrg[0].role === "owner" && (
+                    <DeleteProjectButton 
+                      projectId={project.id}
+                      organizationId={project.organizationId}
+                      projectTitle={project.title}
+                    />
+                  )}
+                  
                 </div>
               )}
             </div>
