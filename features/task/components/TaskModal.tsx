@@ -246,7 +246,7 @@ export function TaskModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/10 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl border border-gray-200 w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div className="bg-white rounded-2xl border border-gray-200 w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
         <div className="flex justify-between items-center p-6 border-b border-gray-100 shrink-0">
           <h2 className="text-xl font-bold text-gray-900">
             {isDeleting
@@ -306,26 +306,41 @@ export function TaskModal({
                 {task.title}
               </h3>
 
-              <div className="space-y-4">
-                <div>
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5 flex items-center gap-1.5">
-                    <AlignLeft size={13} /> Deskripsi
-                  </p>
-                  <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
-                    {task.description || (
-                      <span className="text-gray-400 italic">
-                        Tidak ada deskripsi.
-                      </span>
-                    )}
-                  </p>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5 flex items-center gap-1.5">
+                      <AlignLeft size={13} /> Deskripsi
+                    </p>
+                    <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                      {task.description || (
+                        <span className="text-gray-400 italic">
+                          Tidak ada deskripsi.
+                        </span>
+                      )}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5 flex items-center gap-1.5">
+                      <Calendar size={13} /> Tenggat Waktu
+                    </p>
+                    <p className="text-sm text-gray-700">
+                      {formattedDueDate || (
+                        <span className="text-gray-400 italic">
+                          Tidak ada tenggat waktu.
+                        </span>
+                      )}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="mt-4">
+                <div>
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 flex items-center gap-1.5">
                     <CheckSquare size={13} /> Checklist
                   </p>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
                     {task.checklists && task.checklists.length > 0 ? (
                       task.checklists.map((checklist) => (
                         <div
@@ -343,10 +358,10 @@ export function TaskModal({
                               )
                             }
                             disabled={isReadOnly}
-                            className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-600 disabled:opacity-50"
+                            className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-600 disabled:opacity-50 shrink-0"
                           />
                           <span
-                            className={`text-sm ${checklist.isCompleted ? "text-gray-400 line-through" : "text-gray-700"}`}
+                            className={`text-sm truncate ${checklist.isCompleted ? "text-gray-400 line-through" : "text-gray-700"}`}
                           >
                             {checklist.title}
                           </span>
@@ -355,7 +370,7 @@ export function TaskModal({
                               onClick={() =>
                                 handleDeleteChecklist(checklist.id)
                               }
-                              className="ml-auto text-gray-400 hover:text-red-600"
+                              className="ml-auto text-gray-400 hover:text-red-600 shrink-0"
                               title="Hapus item"
                             >
                               <Trash2 size={14} />
@@ -378,30 +393,17 @@ export function TaskModal({
                         onChange={(e) => setNewChecklist(e.target.value)}
                         placeholder="Tambah item baru..."
                         disabled={isDeleting || isSubmitting}
-                        className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-50"
+                        className="flex-1 min-w-0 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-50"
                       />
                       <button
                         onClick={handleAddChecklist}
                         disabled={!newChecklist.trim() || isLoadingChecklist}
-                        className="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium whitespace-nowrap"
+                        className="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium whitespace-nowrap shrink-0"
                       >
-                        {isLoadingChecklist ? "Menyimpan..." : "Tambah"}
+                        {isLoadingChecklist ? "..." : "Tambah"}
                       </button>
                     </div>
                   )}
-                </div>
-
-                <div>
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5 flex items-center gap-1.5">
-                    <Calendar size={13} /> Tenggat Waktu
-                  </p>
-                  <p className="text-sm text-gray-700">
-                    {formattedDueDate || (
-                      <span className="text-gray-400 italic">
-                        Tidak ada tenggat waktu.
-                      </span>
-                    )}
-                  </p>
                 </div>
               </div>
 
@@ -413,7 +415,7 @@ export function TaskModal({
                 {!isReadOnly && (
                   <form
                     onSubmit={handleSubmitComment}
-                    className="mb-6 flex gap-3"
+                    className="mb-4 flex gap-3"
                   >
                     <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
                       <User size={14} className="text-indigo-600" />
@@ -425,12 +427,12 @@ export function TaskModal({
                         onChange={(e) => setNewComment(e.target.value)}
                         placeholder="Tulis komentar..."
                         disabled={isSubmittingComment}
-                        className="flex-1 px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:bg-white transition-colors"
+                        className="flex-1 min-w-0 px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:bg-white transition-colors"
                       />
                       <button
                         type="submit"
                         disabled={!newComment.trim() || isSubmittingComment}
-                        className="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors flex items-center gap-1.5 text-sm font-medium"
+                        className="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors flex items-center gap-1.5 text-sm font-medium shrink-0"
                       >
                         {isSubmittingComment ? (
                           "..."
@@ -444,7 +446,7 @@ export function TaskModal({
                   </form>
                 )}
 
-                <div className="space-y-4">
+                <div className="space-y-4 max-h-56 overflow-y-auto pr-1">
                   {isLoadingComments ? (
                     <p className="text-sm text-gray-400 text-center py-2">
                       Memuat komentar...
@@ -461,7 +463,7 @@ export function TaskModal({
                             ? comment.user.name.charAt(0)
                             : "U"}
                         </div>
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                           <div className="flex items-baseline gap-2 mb-1">
                             <span className="font-semibold text-gray-900 text-sm">
                               {comment.user.name}
@@ -530,108 +532,11 @@ export function TaskModal({
                   <AlignLeft size={16} className="text-gray-500" /> Deskripsi
                 </label>
                 <textarea
-                  rows={4}
+                  rows={3}
                   {...register("description")}
                   placeholder="Detail tambahan..."
                   className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 resize-none"
                 />
-              </div>
-
-              {mode === "create" && (
-                <div className="bg-gray-50/50 p-4 rounded-xl border border-gray-200 border-dashed">
-                  <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                    <CheckSquare size={16} className="text-gray-500" /> Item
-                    Checklist (Opsional)
-                  </label>
-
-                  {pendingChecklists.length > 0 && (
-                    <div className="space-y-2 mb-3">
-                      {pendingChecklists.map((item, idx) => (
-                        <div
-                          key={idx}
-                          className="flex justify-between items-center bg-white border border-gray-200 px-3 py-1.5 rounded-lg text-sm"
-                        >
-                          <span className="text-gray-700">{item}</span>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setPendingChecklists((prev) =>
-                                prev.filter((_, i) => i !== idx),
-                              )
-                            }
-                            className="text-gray-400 hover:text-red-500 transition-colors"
-                          >
-                            <X size={14} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={pendingInput}
-                      onChange={(e) => setPendingInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          if (pendingInput.trim()) {
-                            setPendingChecklists((prev) => [
-                              ...prev,
-                              pendingInput.trim(),
-                            ]);
-                            setPendingInput("");
-                          }
-                        }
-                      }}
-                      placeholder="Ketik lalu tekan Enter..."
-                      className="flex-1 px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
-                    />
-                    <button
-                      type="button"
-                      disabled={!pendingInput.trim()}
-                      onClick={() => {
-                        setPendingChecklists((prev) => [
-                          ...prev,
-                          pendingInput.trim(),
-                        ]);
-                        setPendingInput("");
-                      }}
-                      className="px-3 py-2 bg-indigo-100 text-indigo-700 font-medium text-sm rounded-lg hover:bg-indigo-200 disabled:opacity-50 transition-colors"
-                    >
-                      Tambah
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                  <User size={16} /> Ditugaskan Kepada
-                </label>
-                <div className="bg-white border border-gray-200 rounded-lg p-3 max-h-32 overflow-y-auto space-y-2">
-                  {members.length === 0 && (
-                    <span className="text-xs text-gray-400">
-                      Tidak ada anggota tersedia
-                    </span>
-                  )}
-                  {members.map((member) => (
-                    <label
-                      key={member.userId}
-                      className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer hover:bg-gray-50 p-1 rounded transition-colors"
-                    >
-                      <input
-                        type="checkbox"
-                        value={member.userId}
-                        disabled={userRole === "member"}
-                        {...register("assigneeIds")}
-                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-600 disabled:opacity-50"
-                      />
-                      {member.name || `User ID: ${member.userId}`}
-                    </label>
-                  ))}
-                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -665,6 +570,110 @@ export function TaskModal({
                     className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
                   />
                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 items-start">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                    <User size={16} /> Ditugaskan Kepada
+                  </label>
+                  <div className="bg-white border border-gray-200 rounded-lg p-3 h-40 overflow-y-auto space-y-2">
+                    {members.length === 0 && (
+                      <span className="text-xs text-gray-400">
+                        Tidak ada anggota tersedia
+                      </span>
+                    )}
+                    {members.map((member) => (
+                      <label
+                        key={member.userId}
+                        className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer hover:bg-gray-50 p-1 rounded transition-colors"
+                      >
+                        <input
+                          type="checkbox"
+                          value={member.userId}
+                          disabled={userRole === "member"}
+                          {...register("assigneeIds")}
+                          className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-600 disabled:opacity-50 shrink-0"
+                        />
+                        <span className="truncate">
+                          {member.name || `User ID: ${member.userId}`}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {mode === "create" && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                      <CheckSquare size={16} className="text-gray-500" /> Item
+                      Checklist (Opsional)
+                    </label>
+                    <div className="bg-gray-50/50 border border-gray-200 border-dashed rounded-lg p-3 h-40 flex flex-col">
+                      {pendingChecklists.length > 0 && (
+                        <div className="space-y-2 mb-2 overflow-y-auto flex-1">
+                          {pendingChecklists.map((item, idx) => (
+                            <div
+                              key={idx}
+                              className="flex justify-between items-center bg-white border border-gray-200 px-2.5 py-1.5 rounded-md text-sm"
+                            >
+                              <span className="text-gray-700 truncate">
+                                {item}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setPendingChecklists((prev) =>
+                                    prev.filter((_, i) => i !== idx),
+                                  )
+                                }
+                                className="text-gray-400 hover:text-red-500 transition-colors shrink-0 ml-2"
+                              >
+                                <X size={14} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="flex gap-2 mt-auto">
+                        <input
+                          type="text"
+                          value={pendingInput}
+                          onChange={(e) => setPendingInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              if (pendingInput.trim()) {
+                                setPendingChecklists((prev) => [
+                                  ...prev,
+                                  pendingInput.trim(),
+                                ]);
+                                setPendingInput("");
+                              }
+                            }
+                          }}
+                          placeholder="Ketik lalu Enter..."
+                          className="flex-1 min-w-0 px-2.5 py-1.5 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                        />
+                        <button
+                          type="button"
+                          disabled={!pendingInput.trim()}
+                          onClick={() => {
+                            setPendingChecklists((prev) => [
+                              ...prev,
+                              pendingInput.trim(),
+                            ]);
+                            setPendingInput("");
+                          }}
+                          className="px-2.5 py-1.5 bg-indigo-100 text-indigo-700 font-medium text-sm rounded-md hover:bg-indigo-200 disabled:opacity-50 transition-colors shrink-0"
+                        >
+                          <Plus size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
