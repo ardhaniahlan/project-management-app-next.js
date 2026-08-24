@@ -42,7 +42,6 @@ export function Sidebar({ user, organizationName }: SidebarProps) {
       requiresOrg: true,
     },
     { name: "Team", href: "/team", icon: Users, requiresOrg: true },
-    { name: "Settings", href: "/settings", icon: Settings, requiresOrg: false },
   ];
 
   const visibleRoutes = allRoutes.filter(

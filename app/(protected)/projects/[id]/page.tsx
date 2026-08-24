@@ -18,6 +18,7 @@ import Link from "next/link";
 import { KanbanBoard } from "@/features/project/components/KanbanBoard";
 import { ProjectStatusButton } from "@/features/project/components/ProjectStatusButton";
 import { DeleteProjectButton } from "@/features/project/components/DeleteProjectButton";
+import { ExpandableDescription } from "@/features/project/components/ExpandableDescription";
 
 const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET);
 
@@ -169,9 +170,7 @@ export default async function ProjectDetailPage({
                     {project.status === "completed" ? "Selesai" : "Aktif"}
                   </span>
                 </div>
-                <p className="text-sm text-gray-500 line-clamp-1">
-                  {project.description || "Tidak ada deskripsi."}
-                </p>
+                <ExpandableDescription text={project.description} />
               </div>
             </div>
 
